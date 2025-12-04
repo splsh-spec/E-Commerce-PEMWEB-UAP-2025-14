@@ -14,9 +14,16 @@ class StoresSeeder extends Seeder
     public function run(): void
     {
         Store::create([
-            'user_id' => config('seed.member_owner_id'),
+            'user_id' => 2,
+            'logo'=> 'default.png',
+            'about'=> 'Toko yang menjual produk olahraga',
+            'phone'=> '08123456789',
             'name' => 'Toko Olahraga Sehat',
             'address' => 'Jl. Veteran, Malang',
+            'address_id'=> '101',
+            'city'=> 'Malang',
+            'postal_code'=> '1234',
+            'is_verified'=> true,
         ]);
     }
 }
