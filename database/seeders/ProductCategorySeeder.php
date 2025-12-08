@@ -13,16 +13,26 @@ class ProductCategorySeeder extends Seeder
      */
     public function run(): void
     {
+
+
         $categories = [
-            'Baju',
-            'Celana',
-            'Sepatu',
-            'Bola',
-            'Alat Olahraga',
+            ['Baju', 'baju', '', '', ''],
+            ['Celana', 'celana', '', '', ''],
+            ['Sepatu', 'sepatu', '', '', ''],
+            ['Bola', 'bola', '', '', ''],
+            ['Alat Olahraga', 'alat-olahraga', '', '', '']
         ];
 
-        foreach ($categories as $cat) {
-            ProductCategory::create(['name' => $cat]);
+
+        foreach ($categories as $cat => $ps) {
+            ProductCategory::create([
+                'image' => null,
+                'name' => $ps[0],
+                'slug' => $ps[1],
+                'tagline' => $ps[2],
+                'description' => $ps[3]
+            ]);
+
         }
     }
 }

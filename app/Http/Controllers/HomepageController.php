@@ -20,7 +20,8 @@ class HomepageController extends Controller
             ->when($selectedCategory, function ($query) use ($selectedCategory) {
                 $query->where('category_id', $selectedCategory);
             })
-            ->with('store', 'category', 'images')
+            ->with('store', 'productCategory', 'productImages')
+
             ->get();
 
         return view('homepage.index', [
