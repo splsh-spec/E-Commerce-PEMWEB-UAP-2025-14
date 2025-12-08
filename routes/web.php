@@ -30,8 +30,8 @@ use App\Http\Controllers\Admin\StoreVerificationController;
 use App\Http\Controllers\Customer\HomeController as MemberHomeController;
 use App\Http\Controllers\Customer\ProductController as MemberProductController;
 use App\Http\Controllers\Customer\CheckoutController as MemberCheckoutController;
-use App\Http\Controllers\Customer\TransactionController;
-use App\Http\Controllers\Customer\WalletController;
+use App\Http\Controllers\Customer\TransactionController as MemberTransactionController;
+use App\Http\Controllers\Customer\WalletController as MemberWalletController;
 
 
 /*
