@@ -18,6 +18,11 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\StoreVerificationController;
 // member
+use App\Http\Controllers\Customer\HomeController as MemberHomeController;
+use App\Http\Controllers\Customer\ProductController as MemberProductController;
+use App\Http\Controllers\Customer\CheckoutController as MemberCheckoutController;
+use App\Http\Controllers\Customer\TransactionController;
+use App\Http\Controllers\Customer\WalletController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -98,28 +103,29 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.delete');
 });
-// member routes
+//member 
 Route::middleware(['auth', 'member'])->group(function () {
 
-    // Homepage
-    Route::get('/', [HomeController::class, 'index'])->name('home');
+    // Homepage member
+    Route::get('/home', [MemberHomeController::class, 'index'])->name('member.home');
 
     // Detail Produk
-    Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
+    Route::get('/product/{slug}', [MemberProductController::class, 'show'])->name('member.product.show');
 
     // Checkout
-    Route::get('/checkout/{productId}', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/checkout/{productId}', [MemberCheckoutController::class, 'index'])->name('member.checkout.index');
+    Route::post('/checkout/process', [MemberCheckoutController::class, 'process'])->name('member.checkout.process');
 
     // Riwayat Transaksi
     Route::get('/history', [TransactionController::class, 'index'])->name('member.history');
 
     // Wallet / Topup
-    Route::get('/wallet/topup', [WalletController::class, 'topupForm'])->name('wallet.topup');
-    Route::post('/wallet/topup', [WalletController::class, 'makeTopup'])->name('wallet.topup.process');
+    Route::get('/wallet/topup', [WalletController::class, 'topupForm'])->name('member.wallet.topup');
+    Route::post('/wallet/topup', [WalletController::class, 'makeTopup'])->name('member.wallet.topup.process');
 
-    // Halaman Payment (VA)
-    Route::get('/payment', [WalletController::class, 'paymentPage'])->name('payment.page');
-    Route::post('/payment/confirm', [WalletController::class, 'confirmPayment'])->name('payment.confirm');
+    // Payment VA
+    Route::get('/payment', [WalletController::class, 'paymentPage'])->name('member.payment.page');
+    Route::post('/payment/confirm', [WalletController::class, 'confirmPayment'])->name('member.payment.confirm');
 });
+
 require __DIR__.'/auth.php';
