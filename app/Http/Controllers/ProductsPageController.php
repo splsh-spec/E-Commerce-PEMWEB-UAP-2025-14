@@ -7,13 +7,6 @@ use Illuminate\Http\Request;
 
 class ProductsPageController extends Controller
 {
-    /**
-     * Menampilkan detail produk lengkap
-     * - semua productImages
-     * - nama store
-     * - kategori produk
-     * - productReviews (+user jika ada)
-     */
     public function show($slug)
     {
         $product = Product::with([
