@@ -121,9 +121,6 @@ Route::middleware(['auth', 'member'])->group(function () {
     // Homepage member
     Route::get('/home', [MemberHomeController::class, 'index'])->name('member.home');
 
-    // Detail Produk
-    Route::get('/product/{slug}', [MemberProductController::class, 'show'])->name('member.product.show');
-
     // Checkout
     Route::get('/checkout/{productId}', [MemberCheckoutController::class, 'index'])->name('member.checkout.index');
     Route::post('/checkout/process', [MemberCheckoutController::class, 'process'])->name('member.checkout.process');
