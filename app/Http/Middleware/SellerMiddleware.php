@@ -16,22 +16,21 @@ class SellerMiddleware
 
         $user = Auth::user();
 
-        // Harus punya role member
-        if ($user->role !== 'member') {
+        // Role harus seller
+        if ($user->role !== 'seller') {
             abort(403, 'Akses ditolak. Halaman ini khusus seller.');
         }
 
-        // Cek apakah user sudah punya toko di tabel stores
+        // Cek apakah user sudah punya toko
         if (!$user->store) {
             abort(403, 'Anda belum memiliki toko.');
         }
 
         // Cek apakah toko sudah diverifikasi admin
-        if ($user->store->is_verified == 0) {
+        if (!$user->store->is_verified) {
             abort(403, 'Toko Anda belum diverifikasi Admin.');
         }
 
         return $next($request);
     }
 }
-

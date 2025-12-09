@@ -25,6 +25,7 @@ use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\OrderController;
 use App\Http\Controllers\Seller\BalanceController;
 use App\Http\Controllers\Seller\WithdrawalController;
+use App\Http\Controllers\SellerDashboardController;
 
 // ADMIN
 use App\Http\Controllers\Admin\AdminController;
@@ -113,6 +114,9 @@ Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(
     Route::get('/withdraw', [WithdrawalController::class, 'index'])->name('withdraw');
     Route::post('/withdraw', [WithdrawalController::class, 'requestWithdraw'])->name('withdraw.submit');
 });
+Route::middleware(['auth', 'seller'])
+    ->get('/seller/dashboard', [SellerDashboardController::class, 'index'])
+    ->name('seller.dashboard');
 
 /*
 |--------------------------------------------------------------------------
