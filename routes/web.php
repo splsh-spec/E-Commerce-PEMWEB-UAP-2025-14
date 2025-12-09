@@ -3,22 +3,38 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// PUBLIC
+/*
+|--------------------------------------------------------------------------
+| PUBLIC CONTROLLERS
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\ProductsPageController;
 use App\Http\Controllers\ProductDetailPageController;
 
-// AUTH
+/*
+|--------------------------------------------------------------------------
+| AUTH CONTROLLER
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\ProfileController;
 
-// CUSTOMER MEMBER
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER MEMBER CONTROLLERS
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\Customer\HomeController as MemberHomeController;
 use App\Http\Controllers\Customer\ProductController as MemberProductController;
 use App\Http\Controllers\Customer\CheckoutController as MemberCheckoutController;
 use App\Http\Controllers\Customer\TransactionController as MemberTransactionController;
 use App\Http\Controllers\Customer\WalletController as MemberWalletController;
 
-// SELLER
+/*
+|--------------------------------------------------------------------------
+| SELLER CONTROLLERS
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\Seller\StoreController;
 use App\Http\Controllers\Seller\CategoryController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
@@ -27,12 +43,18 @@ use App\Http\Controllers\Seller\BalanceController;
 use App\Http\Controllers\Seller\WithdrawalController;
 use App\Http\Controllers\SellerDashboardController;
 
-// ADMIN
+/*
+|--------------------------------------------------------------------------
+| ADMIN CONTROLLERS
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\StoreVerificationController;
 use App\Http\Controllers\Admin\StoreManagementController;
 use App\Http\Controllers\SellerController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -42,9 +64,11 @@ use App\Http\Controllers\SellerController;
 Route::get('/', [HomepageController::class, 'index'])->name('home');
 Route::get('/product/{slug}', [ProductDetailPageController::class, 'show'])->name('product.detail');
 
+
+
 /*
 |--------------------------------------------------------------------------
-| AUTH ROUTES (Profile)
+| AUTH PROFILE ROUTES
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -53,6 +77,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+
 /*
 |--------------------------------------------------------------------------
 | MEMBER ROUTES
@@ -60,27 +86,33 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware(['auth', 'member'])->group(function () {
 
-    Route::get('/home', [MemberHomeController::class, 'index'])->name('member.home');
+    // Home
+    Route::get('/home', [MemberHomeController::class, 'index'])->name('home');
 
     // Store Register
     Route::get('/store/register', [StoreController::class, 'registerForm'])->name('store.register');
     Route::post('/store/register', [StoreController::class, 'store'])->name('store.register.save');
 
     // Checkout
-    Route::get('/checkout/{productId}', [MemberCheckoutController::class, 'index'])->name('member.checkout.index');
-    Route::post('/checkout/process', [MemberCheckoutController::class, 'process'])->name('member.checkout.process');
+    Route::get('/checkout/{productId?}', [MemberCheckoutController::class, 'index'])
+        ->name('checkout.index');
+
+    Route::post('/checkout/process', [MemberCheckoutController::class, 'process'])
+        ->name('checkout.process');
 
     // History
-    Route::get('/history', [MemberTransactionController::class, 'index'])->name('member.history');
+    Route::get('/history', [MemberTransactionController::class, 'index'])->name('history');
 
     // Wallet
-    Route::get('/wallet/topup', [MemberWalletController::class, 'topupForm'])->name('member.wallet.topup');
-    Route::post('/wallet/topup', [MemberWalletController::class, 'makeTopup'])->name('member.wallet.topup.process');
+    Route::get('/wallet/topup', [MemberWalletController::class, 'topupForm'])->name('wallet.topup');
+    Route::post('/wallet/topup', [MemberWalletController::class, 'makeTopup'])->name('wallet.topup.process');
 
     // Payment
-    Route::get('/payment', [MemberWalletController::class, 'paymentPage'])->name('member.payment.page');
-    Route::post('/payment/confirm', [MemberWalletController::class, 'confirmPayment'])->name('member.payment.confirm');
+    Route::get('/payment', [MemberWalletController::class, 'paymentPage'])->name('payment.page');
+    Route::post('/payment/confirm', [MemberWalletController::class, 'confirmPayment'])->name('payment.confirm');
 });
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -89,7 +121,8 @@ Route::middleware(['auth', 'member'])->group(function () {
 */
 Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(function () {
 
-    Route::get('/dashboard', [StoreController::class, 'dashboard'])->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
 
     // Store Profile
     Route::get('/profile', [StoreController::class, 'edit'])->name('profile');
@@ -115,10 +148,7 @@ Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(
     Route::get('/withdraw', [WithdrawalController::class, 'index'])->name('withdraw');
     Route::post('/withdraw', [WithdrawalController::class, 'requestWithdraw'])->name('withdraw.submit');
 });
-Route::middleware(['auth', 'seller'])
-    ->get('/seller/dashboard', [SellerDashboardController::class, 'index'])
-    ->name('seller.dashboard');
-    Route::post('/admin/create-seller', [SellerController::class, 'createSeller']);
+
 
 
 /*
@@ -147,30 +177,32 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/verification', [StoreVerificationController::class, 'index'])->name('verification');
     Route::post('/verification/{id}/approve', [StoreVerificationController::class, 'approve'])->name('verification.approve');
     Route::post('/verification/{id}/reject', [StoreVerificationController::class, 'reject'])->name('verification.reject');
+
+    // Create seller (HANYA SATU ROUTE)
+    Route::post('/create-seller', [SellerController::class, 'createSeller'])->name('create.seller');
 });
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::post('/admin/create-seller', [SellerController::class, 'createSeller'])
-        ->name('admin.create.seller');
-});
+
 Route::get('/admin/create-seller-form', function () {
     return view('admin.create-seller');
 })->middleware(['auth','admin']);
 
 
+
 /*
 |--------------------------------------------------------------------------
-| LOGIN REDIRECT
+| LOGIN REDIRECT FIXED
 |--------------------------------------------------------------------------
 */
 Route::get('/login-redirect', function () {
     if (!Auth::check()) return redirect('/login');
 
     return match (Auth::user()->role) {
-        'admin' => redirect()->route('admin.dashboard'),
+        'admin'  => redirect()->route('admin.dashboard'),
         'seller' => redirect()->route('seller.dashboard'),
-        'member' => redirect()->route('home'),
-        default => redirect('/'),
+        'member' => redirect()->route('member.home'),
+        default  => redirect('/'),
     };
 })->name('login.redirect');
+
 
 require __DIR__.'/auth.php';

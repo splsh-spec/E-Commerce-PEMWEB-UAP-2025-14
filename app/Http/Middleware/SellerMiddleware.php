@@ -9,26 +9,27 @@ class SellerMiddleware
 {
     public function handle($request, Closure $next)
     {
-        // User harus login
         if (!Auth::check()) {
-            abort(403, 'Anda harus login.');
+            return redirect('/login');
         }
 
         $user = Auth::user();
 
         // Role harus seller
         if ($user->role !== 'seller') {
-            abort(403, 'Akses ditolak. Halaman ini khusus seller.');
+            return redirect()->route('login.redirect');
         }
 
-        // Cek apakah user sudah punya toko
+        // Jika belum punya toko → arahkan ke halaman registrasi toko
         if (!$user->store) {
-            abort(403, 'Anda belum memiliki toko.');
+            return redirect()->route('store.register')
+                ->with('error', 'Anda harus membuat toko terlebih dahulu.');
         }
 
-        // Cek apakah toko sudah diverifikasi admin
+        // Jika toko belum diverifikasi admin
         if (!$user->store->is_verified) {
-            abort(403, 'Toko Anda belum diverifikasi Admin.');
+            return redirect()->route('seller.dashboard')
+                ->with('error', 'Toko Anda menunggu verifikasi admin.');
         }
 
         return $next($request);

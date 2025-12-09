@@ -9,8 +9,12 @@ class MemberMiddleware
 {
     public function handle($request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->role !== 'member') {
-            abort(403, 'Akses hanya untuk member.');
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        if (Auth::user()->role !== 'member') {
+            return redirect()->route('login.redirect');
         }
 
         return $next($request);
