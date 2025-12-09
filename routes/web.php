@@ -33,6 +33,7 @@ use App\Http\Controllers\Customer\CheckoutController as MemberCheckoutController
 use App\Http\Controllers\Customer\TransactionController as MemberTransactionController;
 use App\Http\Controllers\Customer\WalletController as MemberWalletController;
 
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -157,5 +158,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/verification/{id}/approve', [StoreVerificationController::class, 'approve'])->name('verification.approve');
     Route::post('/verification/{id}/reject', [StoreVerificationController::class, 'reject'])->name('verification.reject');
 });
+Route::get('/login-redirect', function () {
+    if (!Auth::check()) return redirect('/login');
+
+    return match (Auth::user()->role) {
+        'admin' => redirect()->route('admin.dashboard'),
+        'seller' => redirect()->route('seller.dashboard'),
+        'member' => redirect()->route('home'),
+        default => redirect('/'),
+    };
+})->name('login.redirect');
 
 require __DIR__.'/auth.php';
