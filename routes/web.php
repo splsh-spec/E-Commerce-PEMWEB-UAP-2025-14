@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 // PUBLIC CONTROLLERS
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\ProductsPageController;
+use App\Http\Controllers\ProductDetailPageController;
 
 // AUTH
 use App\Http\Controllers\ProfileController;
@@ -45,6 +46,10 @@ Route::get('/', [HomepageController::class, 'index'])->name('home');
 
 Route::get('/product/{slug}', [ProductsPageController::class, 'show'])
     ->name('product.detail');
+
+
+Route::get('/product/{slug}', [ProductDetailPageController::class, 'show'])
+        ->name('product.detail');
 
 
 /*
