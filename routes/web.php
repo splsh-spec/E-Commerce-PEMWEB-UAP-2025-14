@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\StoreVerificationController;
 use App\Http\Controllers\Admin\StoreManagementController;
+use App\Http\Controllers\SellerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -117,6 +118,8 @@ Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(
 Route::middleware(['auth', 'seller'])
     ->get('/seller/dashboard', [SellerDashboardController::class, 'index'])
     ->name('seller.dashboard');
+    Route::post('/admin/create-seller', [SellerController::class, 'createSeller']);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -145,6 +148,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/verification/{id}/approve', [StoreVerificationController::class, 'approve'])->name('verification.approve');
     Route::post('/verification/{id}/reject', [StoreVerificationController::class, 'reject'])->name('verification.reject');
 });
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::post('/admin/create-seller', [SellerController::class, 'createSeller'])
+        ->name('admin.create.seller');
+});
+Route::get('/admin/create-seller-form', function () {
+    return view('admin.create-seller');
+})->middleware(['auth','admin']);
+
 
 /*
 |--------------------------------------------------------------------------

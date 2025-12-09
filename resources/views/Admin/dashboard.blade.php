@@ -36,6 +36,8 @@
         </a>
 
     </div>
+    <a href="/admin/create-seller-form">Tambah Seller</a>
+
 
 </div>
 @endsection

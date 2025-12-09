@@ -22,5 +22,9 @@ class DatabaseSeeder extends Seeder
             ProductCategorySeeder::class,
             ProductsSeeder::class,
         ]);
+        $this->call([
+    SellerWithStoreSeeder::class,
+]);
+
     }
 }
