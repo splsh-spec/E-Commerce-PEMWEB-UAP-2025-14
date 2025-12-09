@@ -138,4 +138,24 @@ Route::middleware(['auth', 'member'])->group(function () {
     Route::post('/payment/confirm', [WalletController::class, 'confirmPayment'])->name('member.payment.confirm');
 });
 
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+
+    // USER MANAGEMENT
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users');
+    Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
+    Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.delete');
+
+    // STORE MANAGEMENT
+    Route::get('/stores', [StoreManagementController::class, 'index'])->name('stores');
+    Route::get('/stores/{id}/edit', [StoreManagementController::class, 'edit'])->name('stores.edit');
+    Route::put('/stores/{id}', [StoreManagementController::class, 'update'])->name('stores.update');
+    Route::delete('/stores/{id}', [StoreManagementController::class, 'destroy'])->name('stores.delete');
+
+    // VERIFICATION
+    Route::get('/verification', [StoreVerificationController::class, 'index'])->name('verification');
+    Route::post('/verification/{id}/approve', [StoreVerificationController::class, 'approve'])->name('verification.approve');
+    Route::post('/verification/{id}/reject', [StoreVerificationController::class, 'reject'])->name('verification.reject');
+});
+
 require __DIR__.'/auth.php';
