@@ -45,14 +45,15 @@ class CheckoutController extends Controller
      * Proses checkout.
      */
     public function process(Request $request)
-    {
+{
     $request->validate([
-        'product_id.*' => 'required|exists:products,id',
-        'qty.*'        => 'required|integer|min:1',
-        'address'      => 'required|string',
-        'city'         => 'required|string',
-        'postal_code'  => 'required|string',
-        'shipping_type'=> 'required|in:regular,express',
+        'product_id.*'  => 'required|exists:products,id',
+        'qty.*'         => 'required|integer|min:1',
+        'address'       => 'required|string',
+        'city'          => 'required|string',
+        'postal_code'   => 'required|string',
+        'shipping'      => 'required|string',
+        'shipping_type' => 'required|in:regular,express',
         'payment_method'=> 'required|in:saldo,va',
     ]);
 
@@ -67,37 +68,43 @@ class CheckoutController extends Controller
     $subtotal = 0;
     foreach ($products as $p) {
         $qty = $quantities[$p->id];
+
         if ($p->stock < $qty) {
             return back()->with('error', "Stok {$p->name} tidak cukup.");
         }
+
         $subtotal += $p->price * $qty;
     }
 
     $shippingCost = $request->shipping_type === 'express' ? 20000 : 10000;
-
     $grandTotal = $subtotal + $shippingCost;
 
     DB::beginTransaction();
 
     try {
-
-        // === 1. CREATE TRANSACTION ===
+        // TRANSACTION
         $transaction = Transaction::create([
             'code'          => 'TRX-' . strtoupper(uniqid()),
             'buyer_id'      => $user->id,
-            'store_id'      => $products->first()->store_id, // ambil dari produk
+            'store_id'      => $products->first()->store_id,
+
             'address'       => $request->address,
             'address_id'    => 'ADDR-' . rand(10000, 99999),
             'city'          => $request->city,
             'postal_code'   => $request->postal_code,
-            'shipping'      => 'jne', // fix bisa disesuaikan
+
+            'shipping'      => $request->shipping,
             'shipping_type' => $request->shipping_type,
             'shipping_cost' => $shippingCost,
-            'tax'           => 0,
-            'grand_total'   => $grandTotal,
+
+            'tracking_number' => null, // nanti diupdate seller
+            'tax'             => 0,
+            'grand_total'     => $grandTotal,
+
+            'payment_status'  => 'unpaid',
         ]);
 
-        // === 2. DETAIL ===
+        // DETAIL
         foreach ($products as $p) {
             $qty = $quantities[$p->id];
 
@@ -109,18 +116,26 @@ class CheckoutController extends Controller
                 'subtotal'       => $p->price * $qty,
             ]);
 
+            // kurangi stok
             $p->stock -= $qty;
             $p->save();
         }
 
-        // === 3. PAYMENT ===
+        // PAYMENT
         if ($request->payment_method === 'saldo') {
+
             if ($user->saldo < $grandTotal) {
                 DB::rollBack();
                 return back()->with('error', 'Saldo tidak cukup.');
             }
+
+            // potong saldo
             $user->saldo -= $grandTotal;
             $user->save();
+
+            // ubah status transaksi
+            $transaction->payment_status = 'paid';
+            $transaction->save();
         }
 
         DB::commit();
@@ -134,5 +149,5 @@ class CheckoutController extends Controller
         DB::rollBack();
         return back()->with('error', 'Checkout gagal: ' . $e->getMessage());
     }
-    }
+}
 }

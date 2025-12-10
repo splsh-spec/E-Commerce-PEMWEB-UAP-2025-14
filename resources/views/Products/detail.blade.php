@@ -52,7 +52,7 @@
 
             {{-- Tombol Beli --}}
             <div style="margin-top:20px;">
-                <a href="{{ route('member.checkout.index', ['productId' => $product->id]) }}"
+                <a href="{{ route('checkout.index', ['productId' => $product->id]) }}"
                    style="display:inline-block;padding:12px 25px;background:#28a745;
                           color:white;border-radius:6px;font-size:16px;text-decoration:none;
                           font-weight:600;">
