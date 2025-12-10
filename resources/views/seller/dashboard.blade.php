@@ -1,108 +1,102 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Seller')
+@section('title', 'Seller Dashboard')
 
 @section('content')
-
 <div class="container py-4">
 
-    {{-- Header Dashboard --}}
-    <div class="mb-4">
-        <h2 class="fw-bold">Dashboard Seller</h2>
-        <p class="text-muted">Selamat datang, {{ $seller->name }}!</p>
-    </div>
+    {{-- Judul --}}
+    <h2 class="fw-bold mb-4">Seller Dashboard</h2>
 
-    {{-- Informasi Toko --}}
-    <div class="card mb-4">
+    {{-- Info Seller --}}
+    <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            <h5 class="fw-bold mb-2">Informasi Toko</h5>
-            
-            @if ($seller->store)
-                <p class="mb-1"><strong>Nama Toko:</strong> {{ $seller->store->name }}</p>
-                <p class="mb-1"><strong>Alamat:</strong> {{ $seller->store->address }}</p>
-                <p class="mb-1"><strong>Deskripsi:</strong> {{ $seller->store->description ?? '-' }}</p>
-            @else
-                <p class="text-danger">Anda belum memiliki toko.</p>
-            @endif
+            <h5 class="fw-bold mb-1">Welcome, {{ $seller->name }} 👋</h5>
+            <small class="text-muted">
+                Toko: <strong>{{ $seller->store->name ?? '-' }}</strong>
+            </small>
         </div>
     </div>
 
-    {{-- Daftar Produk --}}
-    <div class="card">
-        <div class="card-body">
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold">Produk Anda</h5>
-                <a href="{{ route('seller.products.create') }}" class="btn btn-primary btn-sm">
-                    + Tambah Produk
-                </a>
-            </div>
-
-            @if ($products->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-bordered align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Gambar</th>
-                                <th>Nama Produk</th>
-                                <th>Kategori</th>
-                                <th>Harga</th>
-                                <th>Stok</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            @foreach ($products as $product)
-                                <tr>
-                                    <td>
-                                        @php
-                                            $img = $product->productImages->first()->image_path ?? 'no-image.png';
-                                        @endphp
-                                        <img src="{{ asset('storage/' . $img) }}" 
-                                             alt="image" width="60" class="rounded">
-                                    </td>
-
-                                    <td>{{ $product->name }}</td>
-
-                                    <td>
-                                        {{ $product->productCategory->name ?? 'Tanpa Kategori' }}
-                                    </td>
-
-                                    <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
-
-                                    <td>{{ $product->stock }}</td>
-
-                                    <td>
-                                        <a href="{{ route('seller.products.edit', $product->id) }}" 
-                                           class="btn btn-warning btn-sm">
-                                            Edit
-                                        </a>
-
-                                        <form action="{{ route('seller.products.destroy', $product->id) }}" 
-                                              method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button class="btn btn-danger btn-sm"
-                                                onclick="return confirm('Hapus produk ini?')">
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-
-                        </tbody>
-                    </table>
+    {{-- Statistik --}}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h3 class="fw-bold">{{ $products->count() }}</h3>
+                    <p class="text-muted">Total Produk</p>
                 </div>
-            @else
-                <p class="text-muted">Belum ada produk. Tambahkan produk pertama Anda.</p>
-            @endif
-
+            </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h3 class="fw-bold">–</h3>
+                    <p class="text-muted">Total Penjualan</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h3 class="fw-bold">–</h3>
+                    <p class="text-muted">Saldo Toko</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Judul Daftar Produk --}}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold">Produk Anda</h4>
+        <a href="{{ route('products.create') }}" class="btn btn-primary">Tambah Produk</a>
+    </div>
+
+    {{-- Grid Produk mirip homepage --}}
+    <div class="row g-4">
+        @forelse ($products as $product)
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+
+                    {{-- Gambar Produk --}}
+                    @php
+                        $img = $product->productImages->first()->image_path ?? 'no-image.png';
+                    @endphp
+
+                    <img src="{{ asset('storage/' . $img) }}"
+                        class="card-img-top"
+                        style="height: 200px; object-fit: cover;">
+
+                    <div class="card-body d-flex flex-column">
+
+                        {{-- Nama Produk --}}
+                        <h5 class="fw-bold">{{ $product->name }}</h5>
+
+                        {{-- Kategori --}}
+                        <p class="text-muted small">
+                            {{ $product->productCategory->name ?? 'Tanpa Kategori' }}
+                        </p>
+
+                        {{-- Harga --}}
+                        <p class="fw-bold text-primary">
+                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                        </p>
+
+                        {{-- Tombol --}}
+                        <div class="mt-auto">
+                            <a href="{{ route('products.show', $product->id) }}" class="btn btn-info btn-sm">Detail</a>
+                            <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        @empty
+            <p class="text-muted">Belum ada produk.</p>
+        @endforelse
     </div>
 
 </div>
-
 @endsection

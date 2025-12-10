@@ -13,17 +13,20 @@ class SellerDashboardController extends Controller
      */
     public function index(): View
     {
-        $seller = Auth::user();
+       $seller = Auth::user();
 
-        // Ambil semua produk milik toko seller
-        $products = Product::where('store_id', $seller->store_id)
-            ->with('productImages', 'productCategory')
-            ->latest()
-            ->get();
+if (!$seller->store) {
+    abort(403, "Seller belum punya toko");
+}
 
-        return view('seller.dashboard', [
-            'seller' => $seller,
-            'products' => $products,
-        ]);
+$products = Product::where('store_id', $seller->store->id)
+    ->with('productImages', 'productCategory')
+    ->get();
+
+return view('seller.dashboard', [
+    'seller' => $seller,
+    'products' => $products,
+]);
+
     }
 }

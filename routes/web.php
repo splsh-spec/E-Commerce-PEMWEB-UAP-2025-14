@@ -42,6 +42,8 @@ use App\Http\Controllers\Seller\OrderController;
 use App\Http\Controllers\Seller\BalanceController;
 use App\Http\Controllers\Seller\WithdrawalController;
 use App\Http\Controllers\SellerDashboardController;
+use App\Http\Controllers\ProductController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -148,6 +150,14 @@ Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(
     Route::get('/withdraw', [WithdrawalController::class, 'index'])->name('withdraw');
     Route::post('/withdraw', [WithdrawalController::class, 'requestWithdraw'])->name('withdraw.submit');
 });
+Route::middleware(['auth', 'seller'])->group(function () {
+    Route::resource('products', ProductController::class);
+});
+Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+Route::get('/products/create', [ProductController::class, 'create'])
+    ->name('products.create')
+    ->middleware('auth');
+
 
 
 
