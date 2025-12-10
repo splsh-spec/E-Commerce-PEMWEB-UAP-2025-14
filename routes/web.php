@@ -27,8 +27,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Customer\HomeController as MemberHomeController;
 use App\Http\Controllers\Customer\ProductController as MemberProductController;
 use App\Http\Controllers\Customer\CheckoutController as MemberCheckoutController;
-use App\Http\Controllers\Customer\TransactionController as MemberTransactionController;
 use App\Http\Controllers\Customer\WalletController as MemberWalletController;
+use App\Http\Controllers\Customer\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +88,15 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware(['auth', 'member'])->group(function () {
 
+
+    // Riwayat transaksi
+    Route::get('/transactions', [TransactionController::class, 'index'])
+        ->name('transaction.index');
+
+    // Detail transaksi
+    Route::get('/transactions/{id}', [TransactionController::class, 'show'])
+        ->name('transaction.show');
+
     // Home
     Route::get('/home', [MemberHomeController::class, 'index'])->name('home');
 
@@ -101,9 +110,6 @@ Route::middleware(['auth', 'member'])->group(function () {
 
     Route::post('/checkout/process', [MemberCheckoutController::class, 'process'])
         ->name('checkout.process');
-
-    // History
-    Route::get('/history', [MemberTransactionController::class, 'index'])->name('history');
 
     // Wallet
     Route::get('/wallet/topup', [MemberWalletController::class, 'topupForm'])->name('wallet.topup');

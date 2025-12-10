@@ -1,7 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+@auth
+    @if(auth()->user()->role === 'member')
+        <a href="{{ route('transaction.index') }}" 
+           style="display:inline-block;margin-bottom:20px;padding:10px 15px;background:#007bff;color:white;border-radius:5px;">
+            Riwayat Transaksi
+        </a>
+    @endif
+@endauth
+
 <h1>Daftar Produk</h1>
+
 
 {{-- Filter kategori --}}
 <form method="GET" action="{{ route('home') }}">
