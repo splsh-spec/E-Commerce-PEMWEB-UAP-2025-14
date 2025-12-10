@@ -9,19 +9,15 @@ use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
-    /**
-     * Tampilkan halaman checkout.
-     * Bisa dari keranjang (multiple) atau langsung satu produk.
-     */
     public function index(Request $request, $productId = null)
     {
         $cart = session('cart', []);
 
         if ($productId) {
-            // Checkout satu produk
             $product = Product::findOrFail($productId);
             return view('customer.checkout.index', [
                 'products' => [$product],
@@ -41,113 +37,74 @@ class CheckoutController extends Controller
         ]);
     }
 
-    /**
-     * Proses checkout.
-     */
     public function process(Request $request)
-{
-    $request->validate([
-        'product_id.*'  => 'required|exists:products,id',
-        'qty.*'         => 'required|integer|min:1',
-        'address'       => 'required|string',
-        'city'          => 'required|string',
-        'postal_code'   => 'required|string',
-        'shipping'      => 'required|string',
-        'shipping_type' => 'required|in:regular,express',
-        'payment_method'=> 'required|in:saldo,va',
-    ]);
+    {
+        $user = auth()->user();
 
-    $user = Auth::user();
-
-    $productIds = $request->product_id;
-    $quantities = $request->qty;
-
-    $products = Product::whereIn('id', $productIds)->get();
-
-    // Hitung subtotal
-    $subtotal = 0;
-    foreach ($products as $p) {
-        $qty = $quantities[$p->id];
-
-        if ($p->stock < $qty) {
-            return back()->with('error', "Stok {$p->name} tidak cukup.");
-        }
-
-        $subtotal += $p->price * $qty;
-    }
-
-    $shippingCost = $request->shipping_type === 'express' ? 20000 : 10000;
-    $grandTotal = $subtotal + $shippingCost;
-
-    DB::beginTransaction();
-
-    try {
-        // TRANSACTION
-        $transaction = Transaction::create([
-            'code'          => 'TRX-' . strtoupper(uniqid()),
-            'buyer_id'      => $user->id,
-            'store_id'      => $products->first()->store_id,
-
-            'address'       => $request->address,
-            'address_id'    => 'ADDR-' . rand(10000, 99999),
-            'city'          => $request->city,
-            'postal_code'   => $request->postal_code,
-
-            'shipping'      => $request->shipping,
-            'shipping_type' => $request->shipping_type,
-            'shipping_cost' => $shippingCost,
-
-            'tracking_number' => null, // nanti diupdate seller
-            'tax'             => 0,
-            'grand_total'     => $grandTotal,
-
-            'payment_status'  => 'unpaid',
+        $request->validate([
+            'address'       => 'required',
+            'city'          => 'required',
+            'postal_code'   => 'required',
+            'shipping'      => 'required',       
+            'shipping_type' => 'required',       
+            'payment_method'=> 'required',
+            'product_id'    => 'required|array',
+            'qty'           => 'required|array'
         ]);
 
-        // DETAIL
-        foreach ($products as $p) {
-            $qty = $quantities[$p->id];
+        // Ambil semua produk
+        $products = Product::whereIn('id', $request->product_id)->get();
+
+        // Hitung ongkir
+        $shippingCost = $request->shipping_type === 'express' ? 20000 : 10000;
+
+        // Generate address_id otomatis
+        $addressId = 'ADDR-' . strtoupper(uniqid());
+
+        // Buat transaction
+        $transaction = Transaction::create([
+            'code'          => 'TRX-' . strtoupper(Str::random(8)),
+            'buyer_id'      => $user->id,
+            'store_id'      => $products->first()->store_id,
+            'address_id'    => $addressId,            
+            'address'       => $request->address,
+            'city'          => $request->city,
+            'postal_code'   => $request->postal_code,
+            'shipping'      => $request->shipping,
+            'shipping_type' => $request->shipping_type,
+            'payment_method'=> $request->payment_method,
+            'shipping_cost' => $shippingCost,
+            'tax'           => 0,
+            'grand_total'   => 0,
+            'status'        => 'pending'
+        ]);
+
+        $total = 0;
+
+        // Simpan detail
+        foreach ($products as $product) {
+            $qty = $request->qty[$product->id];
+
+            $subtotal = $product->price * $qty;
+            $total += $subtotal;
 
             TransactionDetail::create([
                 'transaction_id' => $transaction->id,
-                'product_id'     => $p->id,
-                'price'          => $p->price,
-                'quantity'       => $qty,
-                'subtotal'       => $p->price * $qty,
+                'product_id'     => $product->id,
+                'qty'            => $qty,
+                'subtotal'       => $subtotal,
             ]);
 
-            // kurangi stok
-            $p->stock -= $qty;
-            $p->save();
+            // Kurangi stok
+            $product->decrement('stock', $qty);
         }
 
-        // PAYMENT
-        if ($request->payment_method === 'saldo') {
+        // Total + ongkir
+        $transaction->update([
+            'grand_total' => $total + $shippingCost,
+        ]);
 
-            if ($user->saldo < $grandTotal) {
-                DB::rollBack();
-                return back()->with('error', 'Saldo tidak cukup.');
-            }
-
-            // potong saldo
-            $user->saldo -= $grandTotal;
-            $user->save();
-
-            // ubah status transaksi
-            $transaction->payment_status = 'paid';
-            $transaction->save();
-        }
-
-        DB::commit();
-
-        session()->forget('cart');
-
-        return redirect()->route('member.history')
+        return redirect()->route('home', $transaction->id)
             ->with('success', 'Checkout berhasil!');
-
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        return back()->with('error', 'Checkout gagal: ' . $e->getMessage());
     }
-}
 }
