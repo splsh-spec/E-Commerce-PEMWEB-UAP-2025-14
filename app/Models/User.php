@@ -74,4 +74,20 @@ class User extends Authenticatable
     {
         return $this->hasOne(Buyer::class);
     }
+
+    public function balance()
+    {
+    return $this->hasOne(UserBalance::class);
+    }
+
+    protected static function booted()
+{
+    static::created(function ($user) {
+        if ($user->role === 'member') {
+            $user->balance()->create([
+                'balance' => 0
+            ]);
+        }
+    });
+}
 }

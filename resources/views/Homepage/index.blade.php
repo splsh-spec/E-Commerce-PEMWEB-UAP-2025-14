@@ -1,8 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
+
 @auth
     @if(auth()->user()->role === 'member')
+
+        {{-- Tampilkan Saldo --}}
+        <div style="margin-bottom:20px;padding:12px;background:#f8f9fa;border:1px solid #ddd;border-radius:5px;">
+            <strong>Saldo Anda:</strong> 
+            <span style="color:#28a745;font-weight:bold;">
+                Rp {{ number_format($balance, 0, ',', '.') }}
+            </span>
+        </div>
+
+        <a href="{{ route('wallet.topup') }}" 
+           style="display:inline-block;margin-bottom:20px;padding:10px 15px;background:#28a745;color:white;border-radius:5px;">
+            Top Up Saldo
+        </a>
+
         <a href="{{ route('transaction.index') }}" 
            style="display:inline-block;margin-bottom:20px;padding:10px 15px;background:#007bff;color:white;border-radius:5px;">
             Riwayat Transaksi

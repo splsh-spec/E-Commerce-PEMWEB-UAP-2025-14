@@ -29,11 +29,20 @@ class HomepageController extends Controller
             ->with('store', 'productCategory', 'productImages') // eager load relasi
             ->get();
 
+        // Balance user
+        $balance = 0;
+        $user = auth()->user();
+
+        if ($user && $user->role === 'member' && $user->balance) {
+            $balance = $user->balance->balance;
+        }
+
         // Kirim data ke view
         return view('homepage.index', [
             'products' => $products,
             'categories' => $categories,
             'selectedCategory' => $selectedCategory,
+            'balance' => $balance,
         ]);
     }
 }

@@ -27,7 +27,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Customer\HomeController as MemberHomeController;
 use App\Http\Controllers\Customer\ProductController as MemberProductController;
 use App\Http\Controllers\Customer\CheckoutController as MemberCheckoutController;
-use App\Http\Controllers\Customer\WalletController as MemberWalletController;
+use App\Http\Controllers\Customer\WalletController;
 use App\Http\Controllers\Customer\TransactionController;
 
 /*
@@ -112,12 +112,12 @@ Route::middleware(['auth', 'member'])->group(function () {
         ->name('checkout.process');
 
     // Wallet
-    Route::get('/wallet/topup', [MemberWalletController::class, 'topupForm'])->name('wallet.topup');
-    Route::post('/wallet/topup', [MemberWalletController::class, 'makeTopup'])->name('wallet.topup.process');
+    Route::get('/wallet/topup', [WalletController::class, 'topupForm'])->name('wallet.topup');
+    Route::post('/wallet/topup', [WalletController::class, 'makeTopup'])->name('wallet.topup.make');
 
     // Payment
-    Route::get('/payment', [MemberWalletController::class, 'paymentPage'])->name('payment.page');
-    Route::post('/payment/confirm', [MemberWalletController::class, 'confirmPayment'])->name('payment.confirm');
+    Route::get('/wallet/payment', [WalletController::class, 'paymentPage'])->name('wallet.payment');
+    Route::post('/wallet/confirm', [WalletController::class, 'confirmPayment'])->name('wallet.confirm');
 });
 
 

@@ -9,28 +9,46 @@ use Illuminate\Support\Facades\Auth;
 
 class WalletController extends Controller
 {
+    /**
+     * Form Top Up
+     */
     public function topupForm()
     {
+        $this->ensureMember();
+
         return view('customer.wallet.topup');
     }
 
+    /**
+     * Membuat permintaan topup
+     */
     public function makeTopup(Request $request)
     {
+        $this->ensureMember();
+
         $request->validate([
             'amount' => 'required|integer|min:1000'
         ]);
 
+        // Generate nomor VA 10 digit
+        $vaNumber = str_pad(random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
+
         $topup = Topup::create([
-            'user_id' => Auth::id(),
-            'amount' => $request->amount,
-            'status' => 'waiting_payment',
-            'va_number' => '1234567890', // contoh statis
+            'user_id'   => Auth::id(),
+            'amount'    => $request->amount,
+            'status'    => 'waiting_payment',
+            'va_number' => $vaNumber,
         ]);
 
-        return redirect()->route('payment.page')->with('topup_id', $topup->id);
+        return redirect()
+            ->route('wallet.payment')
+            ->with('topup_id', $topup->id);
     }
 
-    public function paymentPage(Request $request)
+    /**
+     * Halaman pembayaran topup
+     */
+    public function paymentPage()
     {
         $topupId = session('topup_id');
 
@@ -41,8 +59,13 @@ class WalletController extends Controller
         return view('customer.wallet.payment', compact('topup'));
     }
 
+    /**
+     * Konfirmasi pembayaran & update saldo
+     */
     public function confirmPayment(Request $request)
     {
+        $this->ensureMember();
+
         $request->validate([
             'topup_id' => 'required|exists:topups,id'
         ]);
@@ -51,15 +74,34 @@ class WalletController extends Controller
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        // update saldo user
+        // Ambil user
         $user = Auth::user();
-        $user->wallet_balance += $topup->amount;
-        $user->save();
 
-        // update status topup
-        $topup->status = 'success';
-        $topup->save();
+        // Jika user belum punya record balance, buat dulu
+        if (!$user->balance) {
+            $user->balance()->create([
+                'balance' => 0
+            ]);
+        }
 
-        return redirect()->route('wallet.topup')->with('success', 'Pembayaran berhasil, saldo bertambah.');
+        // Tambah saldo
+        $user->balance()->increment('balance', $topup->amount);
+
+        // Update status topup
+        $topup->update(['status' => 'success']);
+
+        return redirect()
+            ->route('wallet.topup')
+            ->with('success', 'Pembayaran berhasil! Saldo Anda telah ditambahkan.');
+    }
+
+    /**
+     * Cek role user wajib member
+     */
+    private function ensureMember()
+    {
+        if (Auth::user()->role !== 'member') {
+            abort(403, 'Akses ditolak, fitur ini hanya untuk member.');
+        }
     }
 }
