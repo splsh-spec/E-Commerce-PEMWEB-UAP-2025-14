@@ -26,10 +26,10 @@
                     <!-- Kategori -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Kategori</label>
-                        <select name="category_id" class="form-control" required>
+                        <select name="product_category_id" class="form-control" required>
                             <option value="">-- Pilih Kategori --</option>
-                            @foreach(\App\Models\ProductCategory::all() as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -65,6 +65,7 @@
                     <div class="col-md-12 mb-3">
                         <label class="form-label fw-bold">Deskripsi Produk</label>
                         <textarea name="description" rows="4" class="form-control"></textarea>
+                        <textarea name="description" required></textarea>
                     </div>
 
                     <!-- Upload Gambar Produk -->
@@ -75,9 +76,9 @@
 
                     <!-- store_id milik seller -->
                     <input type="hidden" name="store_id" value="{{ auth()->user()->store->id }}">
-
                 </div>
 
+                {{-- TOMBOL --}}
                 <button type="submit" class="btn btn-primary mt-2">Simpan Produk</button>
                 <a href="{{ route('products.index') }}" class="btn btn-secondary mt-2">Kembali</a>
 

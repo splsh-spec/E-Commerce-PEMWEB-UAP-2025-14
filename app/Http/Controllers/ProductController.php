@@ -1,11 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
 
+namespace App\Http\Controllers;
+use Illuminate\Support\Str;
 use App\Models\Product;
+
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use App\Models\ProductCategory;
+
+
+
 
 class ProductController extends Controller
 {
@@ -15,24 +21,33 @@ class ProductController extends Controller
 
         return view('products.index', compact('products'));
     }
-    public function create(): View
-    {
-        return view('products.create');
-    }
-    public function store(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name'  => 'required',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer',
-            'category_id' => 'required',
-            'store_id' => 'required',
-        ]);
+   public function create(): View
+{
+    $categories = ProductCategory::all();
 
-        Product::create($validated);
+    return view('products.create', compact('categories'));
 
-        return redirect()->route('products.index')->with('status', 'Product added');
-    }
+}
+
+ public function store(Request $request): RedirectResponse
+{
+    $validated = $request->validate([
+        'name'  => 'required',
+        'price' => 'required|numeric',
+        'stock' => 'required|integer',
+        'product_category_id' => 'required',
+        'store_id' => 'required',
+        'description' => 'required',
+    ]);
+
+    // Buat slug otomatis
+   $validated['slug'] = Str::slug($request->name);
+
+
+    Product::create($validated);
+
+    return redirect()->route('products.index')->with('status', 'Product added');
+}
 
     public function show(Product $product): View
     {
@@ -50,7 +65,7 @@ class ProductController extends Controller
             'name'  => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
-            'category_id' => 'required',
+            'product_category_id' => 'required',
         ]);
 
         $product->update($validated);
