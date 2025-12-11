@@ -29,25 +29,30 @@ class ProductController extends Controller
 
 }
 
- public function store(Request $request): RedirectResponse
+
+public function store(Request $request)
 {
     $validated = $request->validate([
-        'name'  => 'required',
-        'price' => 'required|numeric',
-        'stock' => 'required|integer',
-        'product_category_id' => 'required',
-        'store_id' => 'required',
-        'description' => 'required',
+        'name'                => 'required|string',
+        'slug'                => 'nullable|string',
+        'description'         => 'required|string',
+        'condition'           => 'required|in:new,second',
+        'price'               => 'required|numeric',
+        'weight'              => 'required|integer',
+        'stock'               => 'required|integer',
+        'product_category_id' => 'required|exists:product_categories,id',
+        'store_id'            => 'required|exists:stores,id',
     ]);
 
-    // Buat slug otomatis
-   $validated['slug'] = Str::slug($request->name);
-
+    // generate slug otomatis
+    $validated['slug'] = Str::slug($request->name);
 
     Product::create($validated);
 
-    return redirect()->route('products.index')->with('status', 'Product added');
+    return redirect()->route('products.index')
+        ->with('status', 'Produk berhasil ditambah!');
 }
+
 
     public function show(Product $product): View
     {

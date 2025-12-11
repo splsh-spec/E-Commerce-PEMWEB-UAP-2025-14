@@ -46,28 +46,17 @@
                         <input type="number" name="stock" class="form-control" required>
                     </div>
 
-                    <!-- Berat -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Berat (gram)</label>
-                        <input type="number" name="weight" class="form-control">
-                    </div>
+                <!-- Deskripsi -->
+<textarea name="description" class="form-control" required></textarea>
 
-                    <!-- Kondisi -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Kondisi</label>
-                        <select name="condition" class="form-control">
-                            <option value="new">Baru</option>
-                            <option value="used">Bekas</option>
-                        </select>
-                    </div>
+<!-- Berat -->
+<input type="number" name="weight" class="form-control" required>
 
-                    <!-- Deskripsi -->
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label fw-bold">Deskripsi Produk</label>
-                        <textarea name="description" rows="4" class="form-control"></textarea>
-                        <textarea name="description" required></textarea>
-                    </div>
-
+<!-- Kondisi -->
+<select name="condition" class="form-control" required>
+    <option value="new">Baru</option>
+    <option value="second">Bekas</option>
+</select>
                     <!-- Upload Gambar Produk -->
                     <div class="col-md-12 mb-3">
                         <label class="form-label fw-bold">Gambar Produk</label>
