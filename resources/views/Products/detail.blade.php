@@ -12,28 +12,26 @@
     {{-- Container utama --}}
     <div style="display:flex;gap:30px;flex-wrap:wrap;">
 
-        {{-- Gambar utama / placeholder --}}
-        <div style="flex:1;min-width:250px;">
-            @if($product->productImages->first())
-                <img src="{{ asset('storage/' . $product->productImages->first()->image_path) }}"
-                     style="width:100%;border-radius:8px;object-fit:cover;">
-            @else
-                <div style="width:100%;height:250px;background:#f3f3f3;border-radius:8px;
-                            display:flex;align-items:center;justify-content:center;color:#888;">
-                    Tidak ada gambar.
-                </div>
-            @endif
+        {{-- Gambar utama --}}
+        @if($product->productImages->first())
+            <img src="{{ asset('storage/' . $product->productImages->first()->image) }}"
+                style="width:100%;border-radius:8px;object-fit:cover;">
+        @else
+            <div style="width:100%;height:250px;background:#f3f3f3;border-radius:8px;
+                        display:flex;align-items:center;justify-content:center;color:#888;">
+                Tidak ada gambar.
+            </div>
+        @endif
 
-            {{-- Thumbnail --}}
-            @if($product->productImages->count() > 1)
-                <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
-                    @foreach($product->productImages as $img)
-                        <img src="{{ asset('storage/' . $img->image_path) }}"
-                             style="width:70px;height:70px;border-radius:6px;object-fit:cover;border:1px solid #ddd;">
-                    @endforeach
-                </div>
-            @endif
-        </div>
+        {{-- Thumbnail --}}
+        @if($product->productImages->count() > 1)
+            <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                @foreach($product->productImages as $img)
+                    <img src="{{ asset('storage/product/' . $img->image) }}"
+                        style="width:70px;height:70px;border-radius:6px;object-fit:cover;border:1px solid #ddd;">
+                @endforeach
+            </div>
+        @endif
 
         {{-- Detail produk --}}
         <div style="flex:1;min-width:250px;">

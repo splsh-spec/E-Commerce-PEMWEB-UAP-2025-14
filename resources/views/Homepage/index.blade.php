@@ -27,7 +27,6 @@
 
 <h1>Daftar Produk</h1>
 
-
 {{-- Filter kategori --}}
 <form method="GET" action="{{ route('home') }}">
     <select name="category" onchange="this.form.submit()">
@@ -43,15 +42,22 @@
 <div class="product-list" style="display:flex;flex-wrap:wrap;gap:20px;margin-top:20px;">
     @forelse($products as $p)
         <div class="product-card" style="border:1px solid #ccc;padding:15px;width:250px;">
+            
+            {{-- Gambar Produk --}}
+            @if($p->productImages->first())
+                <img src="{{ asset('storage/' . $p->productImages->first()->image) }}"
+                     style="width:100%;height:180px;object-fit:cover;border-radius:5px;margin-bottom:10px;">
+            @else
+                <div style="width:100%;height:180px;background:#f4f4f4;border-radius:5px;
+                            display:flex;align-items:center;justify-content:center;color:#777;margin-bottom:10px;">
+                    Tidak ada gambar
+                </div>
+            @endif
+
             <h3>{{ $p->name }}</h3>
             <p>Harga: Rp {{ number_format($p->price) }}</p>
             <p>Kategori: {{ $p->productCategory->name ?? '-' }}</p>
             <p>Toko: {{ $p->store->name ?? '-' }}</p>
-
-            {{-- Gambar Produk --}}
-            @if($p->productImages->first())
-                <img src="{{ asset('storage/' . $p->productImages->first()->image_path) }}" width="200">
-            @endif
 
             <a href="{{ route('product.detail', $p->slug) }}">Lihat Detail</a>
         </div>
