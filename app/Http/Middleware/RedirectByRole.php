@@ -17,7 +17,7 @@ class RedirectByRole
 
         return match ($role) {
             'admin' => redirect()->route('admin.dashboard'),
-            'seller' => redirect()->route('seller.dashboard'),
+            'seller' => redirect()->route('seller.index'),
             'member' => redirect()->route('home'),
             default => redirect('/'),
         };

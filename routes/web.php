@@ -37,13 +37,11 @@ use App\Http\Controllers\Customer\TransactionController;
 */
 use App\Http\Controllers\Seller\StoreController;
 use App\Http\Controllers\Seller\CategoryController;
-use App\Http\Controllers\Seller\ProductController as SellerProductController;
+use App\Http\Controllers\Seller\SellerProductController;
 use App\Http\Controllers\Seller\OrderController;
 use App\Http\Controllers\Seller\BalanceController;
 use App\Http\Controllers\Seller\WithdrawalController;
 use App\Http\Controllers\SellerDashboardController;
-use App\Http\Controllers\ProductController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -56,8 +54,6 @@ use App\Http\Controllers\Admin\StoreVerificationController;
 use App\Http\Controllers\Admin\StoreManagementController;
 use App\Http\Controllers\SellerController;
 
-
-
 /*
 |--------------------------------------------------------------------------
 | PUBLIC ROUTES
@@ -65,8 +61,6 @@ use App\Http\Controllers\SellerController;
 */
 Route::get('/', [HomepageController::class, 'index'])->name('home');
 Route::get('/product/{slug}', [ProductDetailPageController::class, 'show'])->name('product.detail');
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -79,8 +73,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-
 /*
 |--------------------------------------------------------------------------
 | MEMBER ROUTES
@@ -88,125 +80,111 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware(['auth', 'member'])->group(function () {
 
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transaction.index');
+    Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transaction.show');
 
-    // Riwayat transaksi
-    Route::get('/transactions', [TransactionController::class, 'index'])
-        ->name('transaction.index');
+    Route::get('/home', [MemberHomeController::class, 'index'])->name('member.home');
 
-    // Detail transaksi
-    Route::get('/transactions/{id}', [TransactionController::class, 'show'])
-        ->name('transaction.show');
-
-    // Home
-    Route::get('/home', [MemberHomeController::class, 'index'])->name('home');
-
-    // Store Register
+    // Store register
     Route::get('/store/register', [StoreController::class, 'registerForm'])->name('store.register');
     Route::post('/store/register', [StoreController::class, 'store'])->name('store.register.save');
 
     // Checkout
-    Route::get('/checkout/{productId?}', [MemberCheckoutController::class, 'index'])
-        ->name('checkout.index');
-
-    Route::post('/checkout/process', [MemberCheckoutController::class, 'process'])
-        ->name('checkout.process');
+    Route::get('/checkout/{productId?}', [MemberCheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/process', [MemberCheckoutController::class, 'process'])->name('checkout.process');
 
     // Wallet
     Route::get('/wallet/topup', [WalletController::class, 'topupForm'])->name('wallet.topup');
     Route::post('/wallet/topup', [WalletController::class, 'makeTopup'])->name('wallet.topup.make');
 
-    // Payment
     Route::get('/wallet/payment', [WalletController::class, 'paymentPage'])->name('wallet.payment');
     Route::post('/wallet/confirm', [WalletController::class, 'confirmPayment'])->name('wallet.confirm');
 });
 
-
-
 /*
 |--------------------------------------------------------------------------
-| SELLER ROUTES
+| SELLER ROUTES (UPDATED FINAL)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(function () {
+Route::middleware(['auth', 'seller'])
+    ->prefix('seller')
+    ->name('seller.')
+    ->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
+        // Dashboard
+        Route::get('/dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
 
-    // Store Profile
-    Route::get('/profile', [StoreController::class, 'edit'])->name('profile');
-    Route::put('/profile', [StoreController::class, 'update'])->name('profile.update');
+        // Store Profile
+        Route::get('/profile', [StoreController::class, 'edit'])->name('profile');
+        Route::put('/profile', [StoreController::class, 'update'])->name('profile.update');
 
-    // Categories
-    Route::resource('/categories', CategoryController::class);
+        // Categories
+        Route::resource('/categories', CategoryController::class);
 
-    // Products
-    Route::resource('/products', SellerProductController::class);
-    Route::post('/products/{id}/images', [SellerProductController::class, 'addImage'])->name('products.images.add');
-    Route::delete('/products/images/{id}', [SellerProductController::class, 'deleteImage'])->name('products.images.delete');
+        // PRODUCTS (FULL CRUD + IMAGE UPLOAD)
+        Route::resource('/products', SellerProductController::class);
 
-    // Orders
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
-    Route::post('/orders/{id}/tracking', [OrderController::class, 'updateTracking'])->name('orders.tracking');
+        // Upload gambar produk
+        Route::post('/products/{id}/images', [SellerProductController::class, 'addImage'])
+            ->name('products.images.add');
 
-    // Balance
-    Route::get('/balance', [BalanceController::class, 'index'])->name('balance');
-    Route::get('/balance/history', [BalanceController::class, 'history'])->name('balance.history');
+        // Hapus gambar produk
+        Route::delete('/products/images/{id}', [SellerProductController::class, 'deleteImage'])
+            ->name('products.images.delete');
 
-    // Withdrawal
-    Route::get('/withdraw', [WithdrawalController::class, 'index'])->name('withdraw');
-    Route::post('/withdraw', [WithdrawalController::class, 'requestWithdraw'])->name('withdraw.submit');
-});
-Route::middleware(['auth', 'seller'])->group(function () {
-    Route::resource('products', ProductController::class);
-});
-Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-Route::get('/products/create', [ProductController::class, 'create'])
-    ->name('products.create')
-    ->middleware('auth');
+        // Orders
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders');
+        Route::post('/orders/{id}/tracking', [OrderController::class, 'updateTracking'])->name('orders.tracking');
 
+        // Balance
+        Route::get('/balance', [BalanceController::class, 'index'])->name('balance');
+        Route::get('/balance/history', [BalanceController::class, 'history'])->name('balance.history');
 
-
+        // Withdrawal
+        Route::get('/withdraw', [WithdrawalController::class, 'index'])->name('withdraw');
+        Route::post('/withdraw', [WithdrawalController::class, 'requestWithdraw'])->name('withdraw.submit');
+    });
 
 /*
 |--------------------------------------------------------------------------
 | ADMIN ROUTES
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
-    // User Management
-    Route::get('/users', [UserManagementController::class, 'index'])->name('users');
-    Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
-    Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.delete');
+        // User Management
+        Route::get('/users', [UserManagementController::class, 'index'])->name('users');
+        Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
+        Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.delete');
 
-    // Store Management
-    Route::get('/stores', [StoreManagementController::class, 'index'])->name('stores');
-    Route::get('/stores/{id}/edit', [StoreManagementController::class, 'edit'])->name('stores.edit');
-    Route::put('/stores/{id}', [StoreManagementController::class, 'update'])->name('stores.update');
-    Route::delete('/stores/{id}', [StoreManagementController::class, 'destroy'])->name('stores.delete');
+        // Store Management
+        Route::get('/stores', [StoreManagementController::class, 'index'])->name('stores');
+        Route::get('/stores/{id}/edit', [StoreManagementController::class, 'edit'])->name('stores.edit');
+        Route::put('/stores/{id}', [StoreManagementController::class, 'update'])->name('stores.update');
+        Route::delete('/stores/{id}', [StoreManagementController::class, 'destroy'])->name('stores.delete');
 
-    // Store Verification
-    Route::get('/verification', [StoreVerificationController::class, 'index'])->name('verification');
-    Route::post('/verification/{id}/approve', [StoreVerificationController::class, 'approve'])->name('verification.approve');
-    Route::post('/verification/{id}/reject', [StoreVerificationController::class, 'reject'])->name('verification.reject');
+        // Store Verification
+        Route::get('/verification', [StoreVerificationController::class, 'index'])->name('verification');
+        Route::post('/verification/{id}/approve', [StoreVerificationController::class, 'approve'])->name('verification.approve');
+        Route::post('/verification/{id}/reject', [StoreVerificationController::class, 'reject'])->name('verification.reject');
 
-    // Create seller (HANYA SATU ROUTE)
-    Route::post('/create-seller', [SellerController::class, 'createSeller'])->name('create.seller');
-});
+        // Create seller
+        Route::post('/create-seller', [SellerController::class, 'createSeller'])->name('create.seller');
+    });
 
 Route::get('/admin/create-seller-form', function () {
     return view('admin.create-seller');
 })->middleware(['auth','admin']);
 
-
-
 /*
 |--------------------------------------------------------------------------
-| LOGIN REDIRECT FIXED
+| LOGIN REDIRECT FIX
 |--------------------------------------------------------------------------
 */
 Route::get('/login-redirect', function () {
@@ -219,6 +197,5 @@ Route::get('/login-redirect', function () {
         default  => redirect('/'),
     };
 })->name('login.redirect');
-
 
 require __DIR__.'/auth.php';

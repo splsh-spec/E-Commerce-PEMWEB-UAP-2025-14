@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SellerProductController extends Controller
@@ -18,7 +20,7 @@ class SellerProductController extends Controller
         $store = $request->user()->store;
 
         $products = Product::where('store_id', $store->id)
-            ->with('productCategory')
+            ->with('productCategory', 'productImages')
             ->latest()
             ->paginate(10);
 
@@ -48,6 +50,7 @@ class SellerProductController extends Controller
             'price'               => 'required|numeric|min:0',
             'weight'              => 'required|numeric|min:0',
             'stock'               => 'required|integer|min:0',
+            'images.*'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $store = $request->user()->store;
@@ -64,6 +67,18 @@ class SellerProductController extends Controller
             'stock'               => $request->stock,
         ]);
 
+        // Upload gambar (jika ada)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $img) {
+                $path = $img->store('products', 'public');
+
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image'  => $path,
+                ]);
+            }
+        }
+
         return redirect()->route('seller.products.index')
             ->with('success', 'Produk berhasil ditambahkan!');
     }
@@ -75,7 +90,9 @@ class SellerProductController extends Controller
     {
         $store = $request->user()->store;
 
-        $product = Product::where('store_id', $store->id)->findOrFail($id);
+        $product = Product::where('store_id', $store->id)
+            ->with('productImages')
+            ->findOrFail($id);
 
         $categories = ProductCategory::all();
 
@@ -95,11 +112,13 @@ class SellerProductController extends Controller
             'price'               => 'required|numeric|min:0',
             'weight'              => 'required|numeric|min:0',
             'stock'               => 'required|integer|min:0',
+            'images.*'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $store = $request->user()->store;
 
-        $product = Product::where('store_id', $store->id)->findOrFail($id);
+        $product = Product::where('store_id', $store->id)
+            ->findOrFail($id);
 
         $product->update([
             'product_category_id' => $request->product_category_id,
@@ -112,6 +131,25 @@ class SellerProductController extends Controller
             'stock'               => $request->stock,
         ]);
 
+        // Upload gambar baru (jika ada)
+        if ($request->hasFile('images')) {
+
+            // Opsional: hapus gambar lama
+            foreach ($product->productImages as $old) {
+                Storage::disk('public')->delete($old->image_url);
+                $old->delete();
+            }
+
+            foreach ($request->file('images') as $img) {
+                $path = $img->store('products', 'public');
+
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image'  => $path,
+                ]);
+            }
+        }
+
         return redirect()->route('seller.products.index')
             ->with('success', 'Produk berhasil diperbarui!');
     }
@@ -123,7 +161,15 @@ class SellerProductController extends Controller
     {
         $store = $request->user()->store;
 
-        $product = Product::where('store_id', $store->id)->findOrFail($id);
+        $product = Product::where('store_id', $store->id)
+            ->with('productImages')
+            ->findOrFail($id);
+
+        // Hapus gambar dari storage
+        foreach ($product->productImages as $img) {
+            Storage::disk('public')->delete($img->image);
+            $img->delete();
+        }
 
         $product->delete();
 
