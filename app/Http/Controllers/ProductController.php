@@ -56,7 +56,7 @@ public function store(Request $request)
 
     public function show(Product $product): View
     {
-        return view('products.show', compact('product'));
+        return view('products.detail', compact('product'));
     }
 
     public function edit(Product $product): View
