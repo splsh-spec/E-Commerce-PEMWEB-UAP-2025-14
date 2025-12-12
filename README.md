@@ -1,132 +1,164 @@
-# **Ujian Praktikum Pemrograman Web Aplikasi E-Commerce (Laravel)** 
+KELOMPOK 14
+ANGGOTA
+1. DIMAZ ARTA MAULIDA (245150600111023)
+2. MOHAMMAD YAN HASBY (245150601111011)
 
-## **Konteks Proyek**
+# 📦 E-Commerce Platform Documentation
 
-Kalian diberikan sebuah repositori proyek Laravel 12 yang sudah dilengkapi dengan:
-
-1. Starter Kit **Laravel Breeze** untuk basic autentikasi.  
-2. Semua file **Migrations** yang diperlukan untuk membuat struktur database e-commerce (tabel users, products, transactions, stores, etc.).
-
-**Tugas utama Kalian** adalah membangun web aplikasi full-stack E-Commerce yang fungsional (CRUD) berdasarkan skema database yang disediakan, dengan implementasi khusus pada Role Based Access Control (RBAC) dan Flow Pembayaran.
-
-## **Struktur Database**
-
-![alt text](arsitektur-database.png)
-
-## **Persyaratan Teknis & Setup Awal**
-
-1. **Framework:** Laravel 12\.  
-2. Jalankan **`composer install`** untuk menginstal seluruh dependensi PHP yang dibutuhkan.  
-3. Salin file **`.env.example`** menjadi **`.env`**, lalu edit pengaturan database sesuai server database Kalian  
-4. Jalankan **`php artisan key:generate`** untuk menghasilkan application key baru  
-5. **Database:** Terapkan semua *file* *migration* yang telah disediakan (**`php artisan migrate`**).  
-6. **Seeder:** Kalian **wajib** membuat *Database Seeder* untuk membuat data awal. Silahkan lakukan langkah ini pada folder `database/seeders` dan buat file seeder sesuai tabel dengan data yang diperlukan, minimal:  
-   * Satu pengguna dengan role: 'admin'.  
-   * Dua pengguna dengan role: 'member'.  
-   * Satu Toko (stores) yang dimiliki oleh salah satu member.  
-   * Lima Kategori Produk (product\_categories).  
-   * Sepuluh Produk (products) yang dijual oleh Toko tersebut.  
-7. Jalankan **`php artisan serve`** untuk menjalankan development server  
-8. Buka terminal lain dan jalankan **`npm install && npm run build`** untuk menginstal package Node yang diperlukan.  
-9. Jalankan **`npm run dev`** untuk meng-compile asset dalam mode development  
-10. Buka browser dan akses [**http://localhost:**](http://localhost:8000)`{PORT}` untuk melihat aplikasi
-
-## **Tantangan Khusus (*Challenge*)**
-
-Implementasi Kalian harus mencakup tiga tantangan inti berikut:
-
-### **1\. Role Based Access Control (RBAC)**
-
-Batasi akses ke halaman tertentu berdasarkan peran pengguna.
-
-| Peran (users.role) | Akses ke Halaman | Aturan Akses |
-| :---- | :---- | :---- |
-| **Admin** | Halaman Admin. | Akses penuh ke menu admin. |
-| **Seller/Penjual** | Dasbor Penjual. | Wajib memiliki role: 'member' **DAN** wajib memiliki entri di tabel stores. |
-| **Member/Customer** | Halaman Pelanggan. | Akses ke halaman pembelian dan riwayat. |
-
-### 
-
-### **2\. Implementasi Sistem Keuangan (User Wallet & VA)**
-
-Kalian harus membuat **Tabel Baru** bernama **user\_balances** (untuk *user wallet*/saldo) dan mengimplementasikan dua skema pembayaran:
-
-| Skema Pembayaran | Flow Penggunaan |
-| :---- | :---- |
-| **Opsi A: Bayar dengan Saldo (*Wallet*)** | Pelanggan dapat *Topup* Saldo terlebih dahulu (melalui VA). Saat *checkout*, saldo user\_balances akan langsung dipotong. |
-| **Opsi B: Bayar Langsung (Transfer VA)** | Saat *checkout* produk, sistem akan membuat kode **Virtual Account (VA) yang unik** yang terkait langsung dengan transaction\_id. |
-
-### 
-
-### **3\. Halaman Pembayaran Terpusat (*Dedicated Payment Page*)**
-
-Buat satu halaman/fitur untuk memproses konfirmasi pembayaran VA dari Opsi A (*Topup*) dan Opsi B (Pembelian Langsung).
-
-* **Flow:** Pengguna mengakses halaman Payment \-\> Masukkan Kode VA \-\> Sistem menampilkan detail (jumlah yang harus dibayar) \-\> Pengguna memasukkan nominal transfer (simulasi) \-\> Konfirmasi Pembayaran.  
-* Jika sukses, sistem akan:  
-  * **Untuk Topup:** Menambahkan saldo ke user\_balances.  
-  * **Untuk Pembelian:** Mengubah transactions.payment\_status menjadi paid **dan** menambahkan dana ke store\_balances penjual.
-
-## **Fitur yang Harus Diimplementasikan (Berdasarkan Halaman)**
-
-Implementasikan fungsionalitas CRUD untuk setiap peran:
-
-### **I. Halaman Pengguna (Customer Side)**
-
-| Halaman | Fungsionalitas Wajib |
-| :---- | :---- |
-| **Homepage** (/) | Menampilkan daftar **semua produk** yang tersedia. **Filter** berdasarkan product\_categories. |
-| **Halaman Produk** (/product/{slug}) | Menampilkan detail produk, semua product\_images, nama store, product\_reviews, dan tombol **"Beli"**. |
-| **Checkout** (/checkout) | Proses pengisian alamat, pemilihan *shipping* (shipping\_type, kalkulasi shipping\_cost), pemilihan Opsi Pembayaran (Saldo / Transfer VA). Membuat entri di transactions dan transaction\_details. |
-| **Riwayat Transaksi** (/history) | Melihat daftar transactions yang pernah dilakukan. Dapat melihat detail produk yang dibeli (transaction\_details). |
-| **Topup Saldo** (/wallet/topup) | Mengajukan *topup* saldo pribadi. Menghasilkan VA unik. |
-
-### 
-
-### **II. Halaman Toko (Seller Dashboard)**
-
-Halaman ini hanya dapat diakses oleh *Member* yang sudah mendaftar sebagai Toko.
-
-| Halaman | Fungsionalitas Wajib |
-| :---- | :---- |
-| **Pendaftaran Toko** (/store/register) | CRUD untuk membuat profil Toko (mengisi stores.name, logo, about, dll.). |
-| **Manajemen Toko** (/seller/profile) | CRUD untuk mengelola (update/delete) data Toko dan detail rekening bank. |
-| **Manajemen Kategori** (/seller/categories) | **CRUD** untuk product\_categories. |
-| **Manajemen Produk** (/seller/products) | **CRUD** untuk products dan product\_images (termasuk penKalianan is\_thumbnail). |
-| **Manajemen Pesanan** (/seller/orders) | Melihat daftar pesanan masuk (transactions). Mengubah status pesanan dan mengisi tracking\_number. |
-| **Saldo Toko** (/seller/balance) | Melihat saldo saat ini (store\_balances.balance) dan riwayat saldo (store\_balance\_histories). |
-| **Penarikan Dana** (/seller/withdrawals) | Mengajukan Penarikan dana (membuat entri di withdrawals) dan melihat riwayat withdrawals. |
-
-### 
-
-### **III. Halaman Admin (Admin Only)**
-
-Halaman ini hanya dapat diakses oleh pengguna dengan role: 'admin'.
-
-| Halaman | Fungsionalitas Wajib |
-| :---- | :---- |
-| **Verifikasi Toko** (/admin/verification) | Melihat daftar Toko yang belum terverifikasi (is\_verified: false). Fitur untuk **Memverifikasi** atau **Menolak** pendaftaran toko (mengubah stores.is\_verified). |
-| **Manajemen User & Store** (/admin/users) | Melihat dan mengelola daftar semua users dan stores yang terdaftar. |
-
-## **Penilaian**
-
-Persentase nilai dilakukan berdasarkan indikator berikut
-
-* Tampilan 15%  
-* Presentasi Projek 20% (jika nanti memungkinkan)  
-* Penerapan MVC \+ Efisiensi code 15%  
-* Kelengkapan Project sesuai kriteria 50%
-
-Penilaian akan dilakukan berdasarkan commit nya. Semakin banyak dan kompleks yang dilakukan per individu dalam kelompok, bobot nilai yang diberikan akan semakin besar dan berlaku sebaliknya.
-
-## **Informasi Tambahan**
-
-1. Silahkan fork repositori ini, lalu mulai kerjakan di laptop masing masing dan jangan lupa invite partner kelompok ke dalam repositori.  
-2. Berikan penjelasan aplikasi yang kalian buat sebagaimana readme pada repositori ini dan jangan lupa sertakan nama dan NIM anggota kelompok pada file [readme.md](http://readme.md)  
-3. Dipersilahkan membuat improvisasi pada codingan, library, dan sumber apapun yang dibutuhkan selama tidak merubah arsitektur aplikasi yang diberikan pada poin diatas.  
-4. Jika ada yang kurang dipahami dari perintah soal yang diberikan, feel free untuk menghubungi kami.
+Dokumentasi ini menjelaskan fitur, alur kerja, dan peran pengguna dalam sistem e-commerce untuk menjual barang-barang olahraga yang dikembangkan menggunakan **Laravel**.
 
 ---
-![alt text](<No Problem Running GIF by ProBit Global.gif>)
 
-Semangatt, badai pasti berlalu
+## 🌐 Arsitektur Umum Sistem
+
+Sistem e-commerce ini terdiri dari tiga peran utama:
+
+* **Admin** — Pengelola penuh sistem
+* **Seller** — Pemilik toko yang menjual produk
+* **Member** — Pelanggan yang membeli produk
+
+Setiap peran memiliki antarmuka dan hak akses yang berbeda sesuai fungsinya.
+
+---
+
+# 👨‍💼 ADMIN PANEL
+
+Admin memiliki akses penuh ke seluruh sistem. Fitur utama:
+
+### 1. Manajemen Pengguna
+
+* Melihat semua pengguna (admin, seller, member)
+* Menambah, mengedit, atau menghapus akun
+
+### 2. Manajemen Toko & Seller
+
+* Mengelola data toko milik seller
+* Validasi dan verifikasi seller
+
+---
+
+# 🏪 SELLER PANEL
+
+Seller memiliki dashboard khusus untuk mengelola toko dan produk.
+
+## 1. Kelola Produk
+
+CRUD (Create, Read, Update, Delete) lengkap.
+
+### Tambah Produk
+
+* Input kategori, nama, deskripsi, kondisi, harga, berat, stok
+* Upload gambar produk → tersimpan di `storage/app/public/products`
+* Gambar ditampilkan melalui symlink `public/storage/products`
+
+### Edit Produk
+
+* Mengubah detail produk
+* Mengganti gambar produk lama
+
+### Hapus Produk
+
+* Menghapus produk yang tidak ingin dijual lagi
+
+---
+
+# 👤 MEMBER / CUSTOMER
+
+Member adalah pengguna yang membeli produk.
+
+## 1. Homepage
+
+* Menampilkan daftar semua produk aktif
+* Fitur filter berdasarkan kategori
+
+## 2. Halaman Detail Produk
+
+Menampilkan:
+
+* Deskripsi lengkap produk
+* Gambar produk
+* Review produk
+* Nama toko
+* Tombol **Beli**
+
+## 3. Checkout
+
+* Mengisi alamat pengiriman
+* Memilih metode pengiriman (JNE, J&T, dll.)
+* Perhitungan total pembayaran berdasarkan ongkir dan jumlah produk
+
+## 4. Transaksi
+
+* Melihat semua pesanan yang pernah dibuat
+* Status pesanan (pending, paid, shipped, completed)
+
+## 5. Dompet / Wallet
+
+* Pengisian saldo
+* Pembayaran pesanan menggunakan wallet
+
+---
+
+# 🔒 SISTEM AUTENTIKASI & ROLE
+
+Sistem menggunakan middleware:
+
+```php
+'member' → hanya untuk customer
+'seller' → hanya untuk penjual
+'admin'  → hanya untuk admin
+```
+
+Terdapat juga **RedirectByRole Middleware** yang mengarahkan user ke dashboard sesuai peran:
+
+* Admin → `/admin/dashboard`
+* Seller → `/seller/dashboard`
+* Member → `/home`
+
+---
+
+# 📤 Penyimpanan Gambar Produk
+
+Gambar disimpan pada folder:
+
+```
+storage/app/public/products
+```
+
+Kemudian diakses melalui URL berikut:
+
+```
+/public/storage/products/namafile.jpg
+```
+
+Dengan symlink:
+
+```
+php artisan storage:link
+```
+
+---
+
+# 🧩 Struktur URL Utama
+
+| Role          | URL                 |
+| ------------- | ------------------- |
+| Admin         | `/admin/dashboard`  |
+| Seller        | `/seller/dashboard` |
+| Seller Produk | `/seller/products`  |
+| Member        | `/` (home)          |
+| Checkout      | `/checkout`         |
+
+---
+
+# ✔️ Kesimpulan
+
+Platform e-commerce ini memiliki arsitektur:
+
+* Sistem multirole (Admin, Seller, Member)
+* Manajemen produk dan transaksi yang terstruktur
+* Penyimpanan gambar produk yang aman
+* Dashboard berbeda untuk setiap role
+* CRUD produk lengkap untuk seller
+* Sistem transaksi
+
