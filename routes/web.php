@@ -197,5 +197,9 @@ Route::get('/login-redirect', function () {
         default  => redirect('/'),
     };
 })->name('login.redirect');
+// routes/web.php
+Route::get('/login-custom', function () {
+    return view('auth.login');
+})->name('login.custom');
 
 require __DIR__.'/auth.php';

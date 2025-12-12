@@ -11,7 +11,7 @@
     <a class="navbar-brand" href="{{ route('seller.dashboard') }}">
         Seller Panel
     </a>
-
+    <a href="{{ route('login.custom') }}" class="btn btn-outline-light btn-sm ">logout</a>
     <a href="{{ route('seller.products.index') }}" class="btn btn-outline-light btn-sm">Produk</a>
 </nav>
 
